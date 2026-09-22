@@ -2,7 +2,22 @@
 
 import { useState } from "react";
 
+// ------------------------------------------------------------
+// Clé d'accès Web3Forms — publique par conception : elle
+// identifie le formulaire (et permet le filtrage/désactivation
+// depuis le tableau de bord) mais ne donne aucun accès à la
+// boîte mail. Web3Forms est nécessaire car l'export statique
+// (hébergement mutualisé LWS) n'exécute aucun backend.
+// ------------------------------------------------------------
+const WEB3FORMS_ACCESS_KEY = "735f0dfc-f482-421e-9d6d-45df31c28056";
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+
 type Status = "idle" | "submitting" | "success" | "error";
+
+type Web3FormsResponse = {
+  success?: boolean;
+  message?: string;
+};
 
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -16,36 +31,49 @@ export default function ContactForm() {
     setStatus("submitting");
     setError(null);
 
+    const subject = String(data.get("subject") ?? "");
+    const name = String(data.get("name") ?? "");
+
     try {
-      const response = await fetch("/api/contact", {
+      const response = await fetch(WEB3FORMS_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({
-          name: data.get("name"),
-          email: data.get("email"),
-          company: data.get("company"),
-          subject: data.get("subject"),
-          message: data.get("message"),
-          // Piège anti-spam : champ invisible, doit rester vide
-          website: data.get("website"),
+          access_key: WEB3FORMS_ACCESS_KEY,
+          // Objet de l'e-mail reçu
+          subject: `[${subject}] Nouveau message via le site — ${name}`,
+          // Expéditeur affiché + réponse directe au visiteur
+          from_name: "Site SISBM CORE",
+          replyto: data.get("email"),
+          // Contenu de l'e-mail (libellés lisibles côté réception)
+          Nom: data.get("name"),
+          "E-mail": data.get("email"),
+          Entreprise: data.get("company") || "—",
+          Sujet: subject,
+          Message: data.get("message"),
+          // Piège anti-spam Web3Forms : champ invisible, doit rester vide
+          botcheck: data.get("botcheck"),
         }),
       });
 
-      const payload = (await response.json()) as { ok: boolean; error?: string };
+      const payload = (await response.json()) as Web3FormsResponse;
 
-      if (response.ok && payload.ok) {
+      if (response.ok && payload.success) {
         setStatus("success");
         form.reset();
       } else {
         setError(
-          payload.error ??
+          payload.message ??
             "Une erreur est survenue. Réessayez dans quelques instants."
         );
         setStatus("error");
       }
     } catch {
       setError(
-        "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
+        "Impossible d'envoyer le message. Vérifiez votre connexion et réessayez."
       );
       setStatus("error");
     }
@@ -83,12 +111,12 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate={false}>
-      {/* Honeypot anti-spam : invisible pour l'utilisateur, attirant pour les bots */}
+      {/* Honeypot anti-spam Web3Forms : invisible pour l'utilisateur, attirant pour les bots */}
       <div className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-        <label htmlFor="website">Ne pas remplir ce champ</label>
+        <label htmlFor="botcheck">Ne pas remplir ce champ</label>
         <input
-          id="website"
-          name="website"
+          id="botcheck"
+          name="botcheck"
           type="text"
           tabIndex={-1}
           autoComplete="off"

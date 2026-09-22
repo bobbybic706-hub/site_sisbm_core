@@ -11,6 +11,9 @@ import { siteConfig } from "@/data/site";
 export const alt = `${siteConfig.name} — ${siteConfig.subtitle}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
+// Export statique : la route est générée une unique fois au build
+export const dynamic = "force-static";
+export const revalidate = 86400;
 
 const logoData = await readFile(
   join(process.cwd(), "public", "Ressource_site_sisbm_core", "logo.png"),

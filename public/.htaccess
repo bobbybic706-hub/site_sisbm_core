@@ -1,0 +1,46 @@
+# ============================================================
+# Hebergement mutualise LWS (Apache) — site statique SISBM CORE
+# Ce fichier est place dans `public/` pour etre recopie
+# automatiquement dans `out/` a chaque build.
+# ============================================================
+
+# Page 404 personnalisee generee par Next (out/404.html)
+ErrorDocument 404 /404.html
+
+# Compression a la volee
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+# Cache navigateur
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 1 hour"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/avif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+</IfModule>
+
+# Types MIME corrects pour les polices auto-hebergees (next/font)
+<IfModule mod_mime.c>
+  AddType font/woff2 .woff2
+  AddType image/webp .webp
+  AddType image/avif .avif
+</IfModule>
+
+# Image Open Graph generee par Next (fichier sans extension)
+<FilesMatch "^opengraph-image$">
+  ForceType image/png
+</FilesMatch>
+
+# Encodage par defaut
+AddDefaultCharset UTF-8

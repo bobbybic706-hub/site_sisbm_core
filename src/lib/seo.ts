@@ -22,13 +22,15 @@ export function buildMetadata({
   path,
   absoluteTitle = false,
 }: SeoInput): Metadata {
-  const url = `${siteConfig.websiteUrl}${path === "/" ? "" : path}`;
+  // Export statique : trailingSlash -> URLs canoniques avec slash final
+  const canonicalPath = path === "/" ? "/" : `${path.replace(/\/+$/, "")}/`;
+  const url = `${siteConfig.websiteUrl}${canonicalPath}`;
 
   return {
     title: absoluteTitle ? { absolute: title } : title,
     description,
     alternates: {
-      canonical: path,
+      canonical: canonicalPath,
     },
     openGraph: {
       title,
@@ -37,6 +39,15 @@ export function buildMetadata({
       siteName: siteConfig.name,
       locale: "fr_FR",
       type: "website",
+      // Image générée au build par src/app/opengraph-image.tsx (1200x630)
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: `${siteConfig.name} — ${siteConfig.subtitle}`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",

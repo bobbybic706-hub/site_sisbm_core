@@ -10,10 +10,8 @@ import {
   Gauge,
   Map,
   MapPin,
-  Satellite,
   Shield,
   Smartphone,
-  Wrench,
 } from "lucide-react";
 
 export type OfferLevel = "standard" | "gold" | "premium";
@@ -57,8 +55,8 @@ export const siteConfig = {
   phone1: "+225 27 23 23 94 02",
   phone2: "+225 07 20 16 14 66",
   address: "Abidjan, Côte d’Ivoire",
-  website: "www.sisbm-ci.com",
-  websiteUrl: "https://www.sisbm-ci.com",
+  website: "sisbmcore.sisbm-ci.com",
+  websiteUrl: "https://sisbmcore.sisbm-ci.com",
 };
 
 export const navLinks = [
